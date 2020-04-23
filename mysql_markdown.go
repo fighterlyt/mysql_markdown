@@ -164,8 +164,8 @@ func queryTableColumn(db *sql.DB, dbName string, tableName string) ([]tableColum
 
 /**
 string array contain string func
- */
-func containsString(array []string, val string) (int) {
+*/
+func containsString(array []string, val string) int {
 	for i := 0; i < len(array); i++ {
 		if array[i] == val {
 			return i
@@ -260,16 +260,20 @@ func main() {
 			continue
 		}
 		for _, info := range columnInfo {
+			key := info.ColumnKey.String
+			if key == "" {
+				key = "-"
+			}
 			tableContent += fmt.Sprintf(
 				"| %d | `%s` | %s | %s | %s | %s | %s | %s |\n",
 				info.OrdinalPosition,
 				info.ColumnName,
 				strings.ReplaceAll(info.ColumnComment.String, "\n", ""),
 				info.ColumnType,
-				info.ColumnKey.String,
-				info.IsNullable,
-				info.Extra.String,
-				info.ColumnDefault.String,
+				emptyDefault(info.ColumnKey.String),
+				emptyDefault(info.IsNullable),
+				emptyDefault(info.Extra.String),
+				emptyDefault(info.ColumnDefault.String),
 			)
 		}
 		tableContent += "\n\n"
@@ -280,4 +284,11 @@ func main() {
 	err = db.Close()
 	err = mdFile.Close()
 	fmt.Printf("\033[32mmysql_markdown finished ... \033[0m \n")
+}
+
+func emptyDefault(data string) string {
+	if data == "" {
+		return "-"
+	}
+	return data
 }
